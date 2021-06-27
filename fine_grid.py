@@ -110,14 +110,14 @@ def coordinate(m) -> str:
 
 @mod.action_class
 class GridActions:
-    def grid_activate():
+    def fine_grid_activate():
         """activate chess board"""
         ctx.tags = ['user.fine_grid_enabled']
         if not grid.mcanvas:
             grid.setup()
         grid.draw(grid.mcanvas)
 
-    def grid_close():
+    def fine_grid_close():
         """Close the chessboard"""
         print(ctx.tags)
         grid.close()

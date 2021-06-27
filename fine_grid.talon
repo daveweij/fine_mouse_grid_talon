@@ -1,4 +1,4 @@
 mode: command
 -
 fine grid:
-    user.grid_activate()
+    user.fine_grid_activate()
