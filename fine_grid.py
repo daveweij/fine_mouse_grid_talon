@@ -12,6 +12,7 @@ mod.tag('fine_grid_enabled', desc='Tag enables fine grid commands')
 
 
 class FineMouseGrid:
+    ZOOM_RATIO = 0.6
     def __init__(self):
         self.screen = None
         self.mcanvas = None
@@ -45,8 +46,6 @@ class FineMouseGrid:
         self.mcanvas.freeze()
 
     def draw(self, canvas):
-        paint = canvas.paint
-
         def draw_text(offset_x, offset_y, width, height):
             row_height = height / len(self.rows)
             column_width = width / len(self.columns)
@@ -65,10 +64,10 @@ class FineMouseGrid:
                         coordinate_y,
                         )
                     background_rect = background_rect.inset(-4)
-                    paint.color = "9999994f"
-                    paint.style = Paint.Style.FILL
+                    canvas.paint.color = "9999994f"
+                    canvas.paint.style = Paint.Style.FILL
                     canvas.draw_rect(background_rect)
-                    paint.color = "00ff008f"
+                    canvas.paint.color = "00ff008f"
                     canvas.draw_text(
                         text_string,
                         coordinate_x,
@@ -86,17 +85,41 @@ class FineMouseGrid:
         self.active = False
 
     def reset(self):
+        self.rect = None
+        self.redraw()
+
+    def redraw(self):
         self.close()
         self.setup()
         self.draw(self.mcanvas)
 
-    def go_coordinate(self, row: int, column: str):
+    def get_coordinate(self, row: str, column: str):        
         column_index = self.columns.index(column)
         row_index = self.rows.index(row)
 
         x = self.rect.x + self.rect.width * (column_index + 0.5) / len(self.columns)
         y = self.rect.y + self.rect.height * (row_index + 0.5) / len(self.rows)
-        ctrl.mouse_move(x, y)
+        return x, y
+
+    def go_coordinate(self, row: str, column: str):
+        ctrl.mouse_move(*self.get_coordinate(row, column))
+
+    def zoom(self, row: str, column: str):
+        x, y = self.get_coordinate(row, column)
+
+        xnew_min = self.rect.x 
+        xnew_max = self.rect.x + (1 - self.ZOOM_RATIO)*self.rect.width
+        xnew = x - 0.5*self.ZOOM_RATIO*self.rect.width
+        self.rect.x = max(min(xnew, xnew_max), xnew_min)
+
+        ynew_min = self.rect.y 
+        ynew_may = self.rect.y + (1 - self.ZOOM_RATIO)*self.rect.height
+        ynew = y - 0.5*self.ZOOM_RATIO*self.rect.height
+        self.rect.y = max(min(ynew, ynew_may), ynew_min)
+
+        self.rect.width = self.ZOOM_RATIO*self.rect.width
+        self.rect.height = self.ZOOM_RATIO*self.rect.height
+        self.redraw()
 
 
 grid = FineMouseGrid()
@@ -113,6 +136,7 @@ class GridActions:
     def fine_grid_activate():
         """activate chess board"""
         ctx.tags = ['user.fine_grid_enabled']
+        grid.rect = None
         if not grid.mcanvas:
             grid.setup()
         grid.draw(grid.mcanvas)
@@ -128,3 +152,12 @@ class GridActions:
         print(coordinate)
         row, column = coordinate.split(',')
         grid.go_coordinate(row, column)
+
+    def zoom(coordinate: str):
+        """zoom"""
+        row, column = coordinate.split(',')
+        grid.zoom(row, column)
+
+    def fine_grid_reset():
+        """reset grid to original state"""
+        grid.reset()

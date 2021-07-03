@@ -11,3 +11,7 @@ pick <user.coordinate>:
     user.go_coordinate(coordinate)
 	mouse_click(0)
     user.fine_grid_close()
+zoom <user.coordinate>:
+    user.zoom(coordinate)
+grid reset:
+    user.fine_grid_reset()
