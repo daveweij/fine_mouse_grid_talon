@@ -51,7 +51,7 @@ class FineMouseGrid:
             column_width = width / len(self.columns)
 
             canvas.paint.text_align = canvas.paint.TextAlign.CENTER
-            canvas.paint.set_textsize(16)
+            canvas.paint.textsize = 16
             for row, row_char in enumerate(self.rows):
                 for col, col_char in enumerate(self.columns):
                     coordinate_x = offset_x + column_width * (col + 0.5)
